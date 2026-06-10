@@ -24,6 +24,8 @@ Incluye:
 - `kong.yml` — configuraciones declarativas de Kong para enrutar a cada servicio.
 - `.env.example` — plantilla de variables de entorno para crear tu propio `.env`.
 - `.gitignore` — evita subir tu `.env` y otros archivos locales.
+- `CONTRIBUTING.md` — guía para contribuir al proyecto.
+- `LICENSE` — licencia abierta para uso y contribuciones.
 - `SUPABASE_HERRAMIENTAS.md` — explicación didáctica de cada componente de Supabase, sus puertos y su uso.
 - `README.md` — documentación de uso y referencia.
 
@@ -122,6 +124,18 @@ Una vez levantado el stack, puedes probar estos endpoints:
 - Studio: `http://localhost:8000`
 
 ---
+
+## 💬 Contribuciones
+
+Este proyecto está pensado para ayudar a la comunidad.
+
+- Si encuentras un error, abre un issue.
+- Si quieres mejorar la documentación o la configuración, envía un pull request.
+- Revisa `CONTRIBUTING.md` para saber cómo contribuir.
+
+## 📜 Licencia
+
+Este proyecto está disponible bajo la licencia `MIT`. Consulta el archivo `LICENSE` para más detalles.
 
 ## Notas finales
 
