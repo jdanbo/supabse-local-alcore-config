@@ -1,10 +1,10 @@
 # 🚀 Supabase Local Self-Hosted con Docker
 
-## 📌 Descripción
+## 📌 Objetivo
 
-Este repositorio contiene la guía para ejecutar una instancia de Supabase completamente self-hosted en local usando Docker Compose.
+Este repositorio ofrece una configuración funcional de Supabase self-hosted para ejecución local con Docker Compose. Está diseñada para que puedas levantar todos los servicios de Supabase juntos y probarlos en tu máquina sin depender de la nube.
 
-La solución incluye los componentes principales de Supabase:
+Incluye:
 
 - PostgreSQL
 - Realtime (WebSockets)
@@ -16,174 +16,114 @@ La solución incluye los componentes principales de Supabase:
 - Studio
 - Kong API Gateway
 
-> Ideal para entornos de desarrollo, pruebas y demostraciones locales.
+---
+
+## 📁 Archivos incluidos
+
+- `docker-compose.yml` — define los servicios y su conexión interna.
+- `kong.yml` — configuraciones declarativas de Kong para enrutar a cada servicio.
+- `.env.example` — plantilla de variables de entorno para crear tu propio `.env`.
+- `.gitignore` — evita subir tu `.env` y otros archivos locales.
+- `README.md` — documentación de uso y referencia.
 
 ---
 
-## 📦 Estructura recomendada
+## ⚙️ Cómo usar
+
+1. Copia el ejemplo de entorno:
 
 ```bash
-supabase/
-├── docker-compose.yml
-├── .env
-├── kong.yml
-├── volumes/
-├── postgres/
-│   └── storage/
-└── backups/
+cp .env.example .env
 ```
 
----
+2. Ajusta los valores dentro de `.env`.
 
-## ⚙️ Requisitos
-
-- Docker
-- Docker Compose
-- Git
-- Node.js (opcional, solo si quieres ejecutar scripts extra)
-
----
-
-## 🌐 Diagrama de arquitecturá
-
-```mermaid
-flowchart TB
-  Client[Aplicaciones Web / Mobile]
-  Client --> Kong
-  Kong --> Auth
-  Kong --> Rest
-  Kong --> Realtime
-  Kong --> Storage
-  Kong --> Studio
-  Auth --> PostgreSQL
-  Rest --> PostgreSQL
-  Realtime --> PostgreSQL
-  Storage --> PostgreSQL
-  Meta --> PostgreSQL
-  Storage --> ImgProxy
-  Studio --> Meta
-```
-
----
-
-## 🔧 Variables de entorno
-
-Crea un archivo `.env` con los valores necesarios.
-
-```env
-# PostgreSQL
-POSTGRES_DB=postgres
-POSTGRES_PORT=5432
-POSTGRES_PASSWORD=SuperPassword123
-
-# JWT
-JWT_SECRET=CAMBIAR_POR_UN_SECRET_DE_32_CARACTERES
-JWT_EXPIRY=3600
-
-# API KEYS
-ANON_KEY=GENERAR_ANON_KEY
-SERVICE_ROLE_KEY=GENERAR_SERVICE_ROLE_KEY
-
-# Realtime
-SECRET_KEY_BASE=GENERAR_SECRET_KEY_BASE
-
-# Meta
-PG_META_CRYPTO_KEY=GENERAR_CRYPTO_KEY
-
-# URLs
-SITE_URL=http://localhost:3000
-API_EXTERNAL_URL=http://localhost:8000
-SUPABASE_PUBLIC_URL=http://localhost:8000
-ADDITIONAL_REDIRECT_URLS=http://localhost:3000
-
-# Studio
-STUDIO_ORG=ALCORE
-STUDIO_PROJECT=Supabase Local
-
-# Kong
-KONG_HTTP_PORT=8000
-```
-
-> Cambia todos los valores de clave y secretos antes de usarlo en un entorno que no sea de desarrollo.
-
----
-
-## ▶️ Cómo iniciar el proyecto
-
-1. Clona el repositorio.
-2. Copia el ejemplo de variables de entorno y ajusta los valores.
-3. Ejecuta:
+3. Levanta el stack:
 
 ```bash
 docker compose up -d
 ```
 
-4. Verifica que los contenedores estén activos:
+4. Verifica el estado de los contenedores:
 
 ```bash
 docker compose ps
 ```
 
----
+5. Accede a Kong en:
 
-## 🧩 Servicios principales
-
-### PostgreSQL
-
-- Motor de base de datos principal.
-- Almacena usuarios, datos de negocio, políticas RLS, eventos Realtime y metadatos de Storage.
-
-### Realtime
-
-- Permite conexiones WebSocket.
-- Sincroniza datos en tiempo real.
-- Ideal para chats, dashboards en vivo y notificaciones instantáneas.
-
-### Auth
-
-- Gestión de autenticación, registro, recuperación de contraseña y JWT.
-- Expone el servicio de GoTrue para login y autorización.
-
-### REST API (PostgREST)
-
-- Genera automáticamente endpoints REST desde tu base de datos PostgreSQL.
-- Usa JWT para validar el acceso.
-
-### Storage
-
-- Guarda archivos estáticos como imágenes, PDFs y videos.
-- Administra buckets y permisos desde Supabase Studio.
-
-### ImgProxy
-
-- Optimiza imágenes en tiempo real.
-- Soporta WebP, resize y thumbnails.
-
-### Postgres Meta
-
-- Brinda soporte para administración de metadatos desde Studio.
-- Usa el servicio de meta para la interfaz gráfica.
-
-### Studio
-
-- Interfaz gráfica de Supabase.
-- Permite crear tablas, ejecutar SQL, configurar reglas y gestionar Storage.
-
-### Kong
-
-- Gateway de entrada principal.
-- Enruta solicitudes hacia Auth, REST, Realtime, Storage y Studio.
+```text
+http://localhost:8000
+```
 
 ---
 
-## ✅ Buenas prácticas
+## 🌐 Servicios y conexiones
 
-- No uses secretos visibles en producción.
-- Mantén el archivo `.env` fuera del control de versiones.
-- Cambia las claves `JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY` y `SECRET_KEY_BASE` por valores seguros.
+### `docker-compose.yml`
+
+El archivo `docker-compose.yml` enlaza todos los servicios localmente y mantiene el enlace entre ellos mediante Docker Networking.
+
+- `db` expone PostgreSQL en `5432`
+- `auth` corre en `9999`
+- `rest` corre en `3000`
+- `realtime` corre en `4000`
+- `storage` usa `5000` internamente
+- `meta` corre en `8080`
+- `studio` corre en `3000`
+- `kong` expone la entrada en `8000`
+
+### `kong.yml`
+
+Kong actúa como gateway principal y enruta todas las solicitudes a cada servicio:
+
+- `/auth/v1` → Auth
+- `/rest/v1` → REST API
+- `/realtime/v1` → Realtime
+- `/storage/v1` → Storage
+- `/` → Studio
 
 ---
 
-## 📌 Notas finales
+## 🔧 Variables de entorno
 
-Este README está pensado para que el proyecto sea fácil de entender y desplegar localmente. Si quieres, puedo ayudarte también a crear un `docker-compose.yml` de ejemplo para esta arquitectura.
+Copia `.env.example` a `.env` y actualiza los valores.
+
+- `POSTGRES_PASSWORD` — contraseña de la base de datos.
+- `JWT_SECRET` — secreto JWT de al menos 32 caracteres.
+- `ANON_KEY`, `SERVICE_ROLE_KEY` — claves de API.
+- `SECRET_KEY_BASE` — clave larga para Realtime.
+- `PG_META_CRYPTO_KEY` — clave para Postgres Meta.
+- `SITE_URL`, `API_EXTERNAL_URL`, `SUPABASE_PUBLIC_URL` — URLs usadas por los servicios.
+
+> No compartas tu `.env` en el repositorio. Usa `.env.example` como plantilla.
+
+---
+
+## ✅ Flujo interno de la plataforma
+
+1. El gateway Kong recibe la petición.
+2. Kong enruta según la ruta solicitada al servicio correspondiente.
+3. Cada servicio usa la base de datos `db` para leer y escribir datos.
+4. `Studio` se conecta a `meta` para la gestión del proyecto.
+5. `Storage` usa `imgproxy` para procesar imágenes.
+
+---
+
+## 🚀 Probar la instalación
+
+Una vez levantado el stack, puedes probar estos endpoints:
+
+- Auth: `http://localhost:8000/auth/v1`
+- REST: `http://localhost:8000/rest/v1`
+- Realtime: `http://localhost:8000/realtime/v1`
+- Storage: `http://localhost:8000/storage/v1`
+- Studio: `http://localhost:8000`
+
+---
+
+## Notas finales
+
+Este repositorio está listo para usar con Docker Compose y provee la configuración de Supabase local necesaria para que los servicios estén conectados entre sí.
+
+El repositorio ya incluye un archivo `.gitignore` que excluye el `.env` y evita que tus secretos de entorno se suban al control de versiones.
